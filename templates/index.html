@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RECYGO ♻️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --green: #1a7a3c;
+            --green-light: #2ea855;
+            --green-pale: #e8f5ed;
+            --green-mid: #c2e8d0;
+            --dark: #0d1f12;
+            --text: #1c2e20;
+            --muted: #6a8570;
+            --white: #ffffff;
+            --shadow: 0 4px 24px rgba(26,122,60,0.10);
+            --radius: 16px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #f0f7f2;
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ---- HEADER ---- */
+        header {
+            background: var(--dark);
+            color: white;
+            padding: 0 32px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+        }
+
+        .logo {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            color: var(--green-light);
+        }
+        .logo span { color: white; }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .token-badge {
+            background: rgba(46,168,85,0.15);
+            border: 1px solid var(--green-light);
+            color: var(--green-light);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .btn {
+            padding: 8px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-primary { background: var(--green-light); color: white; }
+        .btn-primary:hover { background: var(--green); transform: translateY(-1px); }
+        .btn-outline { background: transparent; border: 1.5px solid rgba(255,255,255,0.3); color: white; }
+        .btn-outline:hover { background: rgba(255,255,255,0.1); }
+        .hidden { display: none !important; }
+
+        /* ---- MODAL OVERLAY ---- */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(13,31,18,0.80);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            animation: fadeIn 0.25s ease;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(40px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
+        .modal-box {
+            background: white;
+            border-radius: 24px;
+            padding: 44px 40px 36px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.35);
+            animation: slideUp 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-box::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--green), var(--green-light));
+        }
+
+        .modal-logo {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--green-light);
+            margin-bottom: 20px;
+        }
+        .modal-logo span { color: var(--dark); }
+
+        .modal-box h2 {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.4rem;
+            color: var(--dark);
+            margin-bottom: 6px;
+        }
+
+        .modal-box p { color: var(--muted); font-size: 0.9rem; margin-bottom: 26px; line-height: 1.5; }
+
+        .input-group { margin-bottom: 16px; }
+        .input-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 6px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 13px 16px;
+            border: 2px solid #e0ece4;
+            border-radius: 11px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1rem;
+            color: var(--text);
+            background: #f8fdf9;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+        }
+        .input-group input:focus { border-color: var(--green-light); background: white; box-shadow: 0 0 0 3px rgba(46,168,85,0.12); }
+
+        .modal-actions { margin-top: 8px; }
+        .modal-actions .btn { width: 100%; padding: 13px; font-size: 1rem; border-radius: 11px; }
+
+        .modal-switch {
+            text-align: center;
+            margin-top: 18px;
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+        .modal-switch a { color: var(--green); cursor: pointer; font-weight: 700; text-decoration: none; }
+        .modal-switch a:hover { text-decoration: underline; }
+
+        .modal-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 18px 0;
+            color: #bbb;
+            font-size: 0.8rem;
+        }
+        .modal-divider::before, .modal-divider::after { content: ''; flex: 1; height: 1px; background: #e8e8e8; }
+
+        /* ---- CONTAINER ---- */
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 32px 20px 60px;
+        }
+
+        /* ---- STEPS ---- */
+        .steps-wrapper { margin-bottom: 28px; }
+
+        .step-track {
+            display: flex;
+            align-items: center;
+        }
+
+        .step-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .step-circle {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #dce8df;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .step-circle.active {
+            background: var(--green-light);
+            color: white;
+            box-shadow: 0 0 0 5px rgba(46,168,85,0.2);
+        }
+
+        .step-circle.done {
+            background: var(--green);
+            color: white;
+        }
+
+        .step-label {
+            font-size: 0.68rem;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-top: 6px;
+        }
+
+        .step-connector {
+            flex: 1;
+            height: 3px;
+            background: #dce8df;
+            margin: 0 4px;
+            margin-bottom: 20px;
+            border-radius: 2px;
+            transition: background 0.3s;
+        }
+
+        .step-connector.done { background: var(--green); }
+
+        /* ---- CARD ---- */
+        .card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .card h3 {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.05rem;
+            color: var(--dark);
+            margin-bottom: 22px;
+        }
+
+        /* ---- MATERIAL GRID ---- */
+        .material-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .material-card {
+            border: 2.5px solid #e0ece4;
+            border-radius: 14px;
+            padding: 22px 12px 18px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #fafffe;
+            position: relative;
+        }
+
+        .material-card:hover {
+            border-color: var(--green-light);
+            background: var(--green-pale);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(46,168,85,0.15);
+        }
+
+        .material-card.selected {
+            border-color: var(--green-light);
+            background: var(--green-pale);
+            box-shadow: 0 0 0 3px rgba(46,168,85,0.25);
+            transform: translateY(-2px);
+        }
+
+        .material-card.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 8px; right: 10px;
+            font-size: 0.75rem;
+            color: var(--green);
+            font-weight: 700;
+        }
+
+        .material-emoji { font-size: 2.5rem; margin-bottom: 8px; }
+        .material-name { font-size: 0.82rem; font-weight: 600; color: var(--text); }
+
+        /* ---- CAMERA ---- */
+        #camera {
+            width: 100%;
+            max-height: 280px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 2px solid var(--green-mid);
+            display: none;
+        }
+
+        .camera-actions { display: flex; gap: 10px; margin-top: 12px; }
+
+        .photo-counter {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 14px;
+            background: var(--green-pale);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--green);
+            margin-top: 12px;
+            width: fit-content;
+        }
+
+        .photo-dots { display: flex; gap: 7px; }
+        .photo-dot { width: 10px; height: 10px; border-radius: 50%; background: #c5ddc9; transition: background 0.2s; }
+        .photo-dot.filled { background: var(--green-light); }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .img-box {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            aspect-ratio: 1;
+            border: 2px solid var(--green-mid);
+        }
+
+        .img-box img { width: 100%; height: 100%; object-fit: cover; }
+
+        .delete-btn {
+            position: absolute;
+            top: 6px; right: 6px;
+            background: rgba(229,57,53,0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 26px; height: 26px;
+            padding: 0;
+            font-size: 0.7rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ---- WEIGHT ---- */
+        .unit-toggle {
+            display: flex;
+            background: #e8f0ea;
+            border-radius: 10px;
+            padding: 4px;
+            gap: 4px;
+            margin-bottom: 16px;
+            width: fit-content;
+        }
+
+        .unit-btn {
+            padding: 9px 26px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--muted);
+            background: transparent;
+            transition: all 0.2s;
+        }
+
+        .unit-btn.active {
+            background: white;
+            color: var(--green);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .weight-input-wrap {
+            display: flex;
+            align-items: center;
+            border: 2px solid #e0ece4;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            background: white;
+            transition: border-color 0.2s;
+        }
+
+        .weight-input-wrap:focus-within { border-color: var(--green-light); }
+
+        #weight {
+            flex: 1;
+            padding: 15px 16px;
+            border: none;
+            outline: none;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1.15rem;
+            color: var(--text);
+            background: transparent;
+        }
+
+        .unit-label {
+            padding: 0 16px;
+            font-weight: 700;
+            color: var(--green);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        /* ---- TIMER ---- */
+        .timer-screen { text-align: center; padding: 20px 0 10px; }
+
+        .timer-intro {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .servo-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(46,168,85,0.12);
+            border: 1px solid var(--green-mid);
+            color: var(--green);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            font-family: 'Space Mono', monospace;
+            margin-bottom: 10px;
+        }
+
+        .servo-dot {
+            width: 8px; height: 8px;
+            background: var(--green-light);
+            border-radius: 50%;
+            animation: pulse 1.4s infinite;
+        }
+
+        .timer-ring {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 16px auto;
+        }
+
+        .timer-ring svg { transform: rotate(-90deg); }
+        .timer-ring .ring-track { stroke: #e0ece4; fill: none; }
+        .timer-ring .ring-progress {
+            stroke: var(--green-light);
+            fill: none;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1s linear, stroke 0.3s;
+        }
+
+        .timer-number {
+            position: absolute;
+            font-family: 'Space Mono', monospace;
+            font-size: 3.2rem;
+            font-weight: 700;
+            color: var(--dark);
+            transition: color 0.3s;
+        }
+
+        .timer-label { font-size: 1rem; font-weight: 600; color: var(--muted); margin-top: 4px; }
+
+        .timer-msg {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--green);
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* ---- SHOP ---- */
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .shop-card {
+            border: 2px solid #e0ece4;
+            border-radius: 16px;
+            padding: 22px 18px 18px;
+            text-align: center;
+            background: #fafffe;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .shop-card:hover {
+            border-color: var(--green-light);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 28px rgba(46,168,85,0.14);
+        }
+
+        .shop-emoji { font-size: 3rem; margin-bottom: 12px; }
+        .shop-name { font-weight: 700; font-size: 1rem; margin-bottom: 8px; color: var(--dark); }
+        .shop-price {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--green-pale);
+            color: var(--green);
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.82rem;
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+
+        .shop-card .btn { width: 100%; }
+
+        /* ---- CONGRATS ---- */
+        .congrats-screen { text-align: center; padding: 10px 0 28px; }
+        .congrats-emoji { font-size: 4rem; margin-bottom: 14px; }
+        .congrats-title {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.4rem;
+            color: var(--dark);
+            margin-bottom: 8px;
+        }
+
+        .earned-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--green-pale);
+            border: 2px solid var(--green-mid);
+            color: var(--green);
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-family: 'Space Mono', monospace;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 16px 0 0;
+        }
+
+        /* ---- NAV ---- */
+        .nav-actions { display: flex; gap: 10px; margin-top: 24px; }
+
+        /* ---- TOAST ---- */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--dark);
+            color: white;
+            padding: 13px 26px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            z-index: 9999;
+            transition: transform 0.3s ease;
+            white-space: nowrap;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast.success { background: var(--green); }
+        .toast.error { background: #e53935; }
+
+        @media (max-width: 600px) {
+            .material-grid { grid-template-columns: repeat(2, 1fr); }
+            .shop-grid { grid-template-columns: 1fr; }
+            header { padding: 0 16px; }
+            .card { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+    <div class="logo">RECY<span>GO</span> ♻</div>
+    <div class="header-right">
+        <div class="token-badge" id="tokenDisplay">🪙 0 tokens</div>
+        <button class="btn btn-primary" id="loginBtn" onclick="openLogin()">Login</button>
+        <button class="btn btn-outline hidden" id="logoutBtn" onclick="logout()">Logout</button>
+    </div>
+</header>
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="loginModal">
+    <div class="modal-box">
+        <div class="modal-logo">RECY<span>GO</span> ♻</div>
+        <h2 id="modalTitle">Welcome back 👋</h2>
+        <p id="modalSubtitle">Sign in to start recycling & earning green tokens</p>
+
+        <div class="input-group">
+            <label>Username</label>
+            <input id="username" placeholder="your_username" autocomplete="off">
+        </div>
+        <div class="input-group">
+            <label>Password</label>
+            <input id="password" type="password" placeholder="••••••••">
+        </div>
+
+        <div class="modal-actions" id="modalActions">
+            <button class="btn btn-primary" onclick="login()">Login →</button>
+        </div>
+
+        <div class="modal-switch" id="switchText">
+            Don't have an account? <a onclick="toggleSignup()">Sign up free</a>
+        </div>
+    </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="container hidden" id="mainApp">
+
+    <!-- STEP PROGRESS -->
+    <div class="steps-wrapper">
+        <div class="step-track">
+            <div class="step-col">
+                <div class="step-circle active" id="stepIndicator1">1</div>
+                <div class="step-label">Category</div>
+            </div>
+            <div class="step-connector" id="conn1"></div>
+            <div class="step-col">
+                <div class="step-circle" id="stepIndicator2">2</div>
+                <div class="step-label">Photos</div>
+            </div>
+            <div class="step-connector" id="conn2"></div>
+            <div class="step-col">
+                <div class="step-circle" id="stepIndicator3">3</div>
+                <div class="step-label">Weight</div>
+            </div>
+            <div class="step-connector" id="conn3"></div>
+            <div class="step-col">
+                <div class="step-circle" id="stepIndicator4">4</div>
+                <div class="step-label">Discard</div>
+            </div>
+            <div class="step-connector" id="conn4"></div>
+            <div class="step-col">
+                <div class="step-circle" id="stepIndicator5">5</div>
+                <div class="step-label">Shop</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- STEP 1: CATEGORY -->
+    <div class="card step-page" id="step1">
+        <h3>♻️ Select Material Category</h3>
+        <div class="material-grid">
+            <div class="material-card" onclick="selectMaterial(this, 'Plastic')">
+                <div class="material-emoji">🧴</div>
+                <div class="material-name">Plastic</div>
+            </div>
+            <div class="material-card" onclick="selectMaterial(this, 'Glass')">
+                <div class="material-emoji">🫙</div>
+                <div class="material-name">Glass</div>
+            </div>
+            <div class="material-card" onclick="selectMaterial(this, 'Cardboard')">
+                <div class="material-emoji">📦</div>
+                <div class="material-name">Cardboard</div>
+            </div>
+            <div class="material-card" onclick="selectMaterial(this, 'Cloth')">
+                <div class="material-emoji">👕</div>
+                <div class="material-name">Cloth</div>
+            </div>
+            <div class="material-card" onclick="selectMaterial(this, 'Bio-waste')">
+                <div class="material-emoji">🌿</div>
+                <div class="material-name">Bio-waste</div>
+            </div>
+            <div class="material-card" onclick="selectMaterial(this, 'E-waste')">
+                <div class="material-emoji">📱</div>
+                <div class="material-name">E-waste</div>
+            </div>
+        </div>
+        <button class="btn btn-primary" onclick="goToStep2()">Next →</button>
+    </div>
+
+    <!-- STEP 2: PHOTOS -->
+    <div class="card step-page hidden" id="step2">
+        <h3>📸 Capture Photos <span style="font-size:0.75rem;color:var(--muted);font-family:'DM Sans',sans-serif;font-weight:400">(max 3)</span></h3>
+
+        <video id="camera" autoplay playsinline></video>
+        <div class="camera-actions">
+            <button class="btn btn-primary" onclick="toggleCamera()" id="camBtn">📷 Start Camera</button>
+            <button class="btn" style="background:#0d1f12;color:white" onclick="capture()" id="captureBtn" disabled>⚡ Capture</button>
+        </div>
+        <div class="photo-counter">
+            <div class="photo-dots">
+                <div class="photo-dot" id="dot0"></div>
+                <div class="photo-dot" id="dot1"></div>
+                <div class="photo-dot" id="dot2"></div>
+            </div>
+            <span id="photoCount">0 / 3 photos</span>
+        </div>
+
+        <div class="gallery" id="gallery"></div>
+
+        <div class="nav-actions">
+            <button class="btn" style="background:#e8f0ea;color:var(--muted)" onclick="nextStep(1)">← Back</button>
+            <button class="btn btn-primary" onclick="nextStep(3)">Next →</button>
+        </div>
+    </div>
+
+    <!-- STEP 3: WEIGHT -->
+    <div class="card step-page hidden" id="step3">
+        <h3>⚖️ Enter Weight</h3>
+
+        <div class="unit-toggle">
+            <button class="unit-btn active" id="kgBtn" onclick="setUnit('kg')">KG</button>
+            <button class="unit-btn" id="gBtn" onclick="setUnit('g')">Grams</button>
+        </div>
+
+        <div class="weight-input-wrap">
+            <input type="number" id="weight" placeholder="0.00" min="0.001" step="0.001">
+            <div class="unit-label" id="unitLabel">KG</div>
+        </div>
+
+        <p style="color:var(--muted);font-size:0.85rem;margin-bottom:20px;line-height:1.6">
+            💡 You earn <strong style="color:var(--green)">10 tokens per 100g</strong> — the more you recycle, the more you earn!
+        </p>
+
+        <div class="nav-actions">
+            <button class="btn" style="background:#e8f0ea;color:var(--muted)" onclick="nextStep(2)">← Back</button>
+            <button class="btn btn-primary" onclick="startProcess()">Process ♻️</button>
+        </div>
+    </div>
+
+    <!-- STEP 4: COUNTDOWN -->
+    <div class="card step-page hidden" id="step4">
+        <div class="timer-screen">
+            <div class="servo-badge">
+                <div class="servo-dot"></div>
+                BIN OPEN — SERVO ACTIVE
+            </div>
+            <div class="timer-intro">🗑️ Drop your items in the bin now!</div>
+
+            <div class="timer-ring">
+                <svg width="180" height="180" viewBox="0 0 180 180">
+                    <circle class="ring-track" cx="90" cy="90" r="78" stroke-width="12"/>
+                    <circle class="ring-progress" id="ringProgress" cx="90" cy="90" r="78"
+                        stroke-width="12"
+                        stroke-dasharray="490"
+                        stroke-dashoffset="0"/>
+                </svg>
+                <div class="timer-number" id="timerNum">10</div>
+            </div>
+
+            <div class="timer-label">seconds remaining</div>
+            <div class="timer-msg" id="timerMsg">⏳ Bin closing in...</div>
+        </div>
+    </div>
+
+    <!-- STEP 5: RESULTS + SHOP -->
+    <div class="card step-page hidden" id="step5">
+        <div class="congrats-screen">
+            <div class="congrats-emoji">🎉</div>
+            <div class="congrats-title">Thank you for recycling!</div>
+            <div style="color:var(--muted);font-size:0.9rem">Bin sealed. Your contribution counts 🌍</div>
+            <div class="earned-badge">🪙 +<span id="earnedTokens">0</span> tokens earned this session</div>
+        </div>
+
+        <h3 style="margin-top:8px">🛍️ Redeem Your Tokens</h3>
+        <div class="shop-grid" id="shop">
+            <div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:30px">Loading products...</div>
+        </div>
+
+        <div style="margin-top:24px">
+            <button class="btn btn-primary" onclick="restartFlow()">♻️ Recycle More</button>
+        </div>
+    </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    let stream = null;
+    let images = [];
+    let isLoggedIn = false;
+    let cameraOn = false;
+    let selectedMaterial = null;
+    let weightUnit = 'kg';
+    let isSignupMode = false;
+    let currentStep = 1;
+
+    /* ---- AUTH UI ---- */
+    function updateAuthUI() {
+        if (isLoggedIn) {
+            document.getElementById("loginBtn").classList.add("hidden");
+            document.getElementById("logoutBtn").classList.remove("hidden");
+        } else {
+            document.getElementById("loginBtn").classList.remove("hidden");
+            document.getElementById("logoutBtn").classList.add("hidden");
+        }
+    }
+
+    function toggleSignup() {
+        isSignupMode = !isSignupMode;
+        if (isSignupMode) {
+            document.getElementById("modalTitle").textContent = "Create account 🌱";
+            document.getElementById("modalSubtitle").textContent = "Join RECYGO and start earning green tokens";
+            document.getElementById("modalActions").innerHTML =
+                `<button class="btn btn-primary" onclick="signup()" style="background:#0d1f12">Create Account →</button>`;
+            document.getElementById("switchText").innerHTML =
+                `Already have an account? <a onclick="toggleSignup()">Login</a>`;
+        } else {
+            document.getElementById("modalTitle").textContent = "Welcome back 👋";
+            document.getElementById("modalSubtitle").textContent = "Sign in to start recycling & earning green tokens";
+            document.getElementById("modalActions").innerHTML =
+                `<button class="btn btn-primary" onclick="login()">Login →</button>`;
+            document.getElementById("switchText").innerHTML =
+                `Don't have an account? <a onclick="toggleSignup()">Sign up free</a>`;
+        }
+    }
+
+    function openLogin() {
+        document.getElementById("loginModal").classList.remove("hidden");
+    }
+
+    function closeLogin() {
+        document.getElementById("loginModal").classList.add("hidden");
+    }
+
+    function login() {
+        let u = document.getElementById("username").value.trim();
+        let p = document.getElementById("password").value;
+        if (!u || !p) { showToast("Please fill in all fields", "error"); return; }
+
+        fetch("/login", {
+            method: "POST",
+            body: new URLSearchParams({ username: u, password: p })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.admin) {
+                window.location.href = "/admin";
+                return;
+            }
+            if (data.message) {
+                isLoggedIn = true;
+                document.getElementById("loginModal").classList.add("hidden");
+                document.getElementById("mainApp").classList.remove("hidden");
+                updateAuthUI();
+                loadUserTokens();
+                showToast("Welcome back! 🌿", "success");
+            } else {
+                showToast(data.error || "Invalid credentials", "error");
+            }
+        })
+        .catch(() => showToast("Connection error", "error"));
+    }
+
+    function signup() {
+        let u = document.getElementById("username").value.trim();
+        let p = document.getElementById("password").value;
+        if (!u || !p) { showToast("Please fill in all fields", "error"); return; }
+
+        fetch("/signup", {
+            method: "POST",
+            body: new URLSearchParams({ username: u, password: p })
+        })
+        .then(r => r.json())
+        .then(d => {
+            if (d.message) {
+                showToast("Account created! Please login 🎉", "success");
+                toggleSignup();
+            } else {
+                showToast(d.error || "Signup failed", "error");
+            }
+        });
+    }
+
+    function logout() {
+        isLoggedIn = false;
+        images = [];
+        selectedMaterial = null;
+        document.getElementById("mainApp").classList.add("hidden");
+        document.getElementById("loginModal").classList.remove("hidden");
+        updateAuthUI();
+        if (cameraOn) stopCamera();
+        fetch("/logout");
+    }
+
+    function loadUserTokens() {
+        fetch("/user_tokens")
+        .then(r => r.json())
+        .then(d => {
+            let t = (d && d.tokens !== undefined) ? d.tokens : 0;
+            document.getElementById("tokenDisplay").textContent = `🪙 ${t} tokens`;
+        }).catch(() => {});
+    }
+
+    /* ---- STEPS ---- */
+    function nextStep(step) {
+        document.querySelectorAll(".step-page").forEach(s => s.classList.add("hidden"));
+        document.getElementById("step" + step).classList.remove("hidden");
+        currentStep = step;
+
+        for (let i = 1; i <= 5; i++) {
+            let circle = document.getElementById("stepIndicator" + i);
+            circle.classList.remove("active", "done");
+            if (i < step) circle.classList.add("done");
+            else if (i === step) circle.classList.add("active");
+        }
+        for (let i = 1; i <= 4; i++) {
+            document.getElementById("conn" + i).classList.toggle("done", i < step);
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* ---- MATERIAL ---- */
+    function selectMaterial(el, name) {
+        document.querySelectorAll(".material-card").forEach(c => c.classList.remove("selected"));
+        el.classList.add("selected");
+        selectedMaterial = name;
+    }
+
+    function goToStep2() {
+        if (!selectedMaterial) { showToast("Please select a material category", "error"); return; }
+        nextStep(2);
+    }
+
+    /* ---- CAMERA ---- */
+    function toggleCamera() {
+        if (!cameraOn) {
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+            .then(s => {
+                stream = s;
+                let video = document.getElementById("camera");
+                video.srcObject = stream;
+                video.style.display = "block";
+                cameraOn = true;
+                document.getElementById("camBtn").textContent = "⏹ Stop Camera";
+                document.getElementById("captureBtn").disabled = false;
+            })
+            .catch(() => showToast("Camera access denied", "error"));
+        } else {
+            stopCamera();
+        }
+    }
+
+    function stopCamera() {
+        if (stream) stream.getTracks().forEach(t => t.stop());
+        document.getElementById("camera").style.display = "none";
+        cameraOn = false;
+        document.getElementById("camBtn").textContent = "📷 Start Camera";
+        document.getElementById("captureBtn").disabled = true;
+    }
+
+    function capture() {
+        if (!cameraOn) return;
+        if (images.length >= 3) { showToast("Maximum 3 photos allowed", "error"); return; }
+
+        let canvas = document.createElement("canvas");
+        let video = document.getElementById("camera");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext("2d").drawImage(video, 0, 0);
+        images.push(canvas.toDataURL());
+        renderGallery();
+        if (images.length >= 3) {
+            showToast("3 photos captured! ✅", "success");
+        }
+    }
+
+    function renderGallery() {
+        let g = document.getElementById("gallery");
+        g.innerHTML = "";
+        images.forEach((img, i) => {
+            g.innerHTML += `
+            <div class="img-box">
+                <img src="${img}" alt="Photo ${i+1}">
+                <button class="delete-btn" onclick="deleteImage(${i})">✕</button>
+            </div>`;
+        });
+        for (let i = 0; i < 3; i++) {
+            document.getElementById("dot" + i).classList.toggle("filled", i < images.length);
+        }
+        document.getElementById("photoCount").textContent = `${images.length} / 3 photos`;
+        if (images.length >= 3) document.getElementById("captureBtn").disabled = true;
+        else if (cameraOn) document.getElementById("captureBtn").disabled = false;
+    }
+
+    function deleteImage(i) {
+        images.splice(i, 1);
+        renderGallery();
+    }
+
+    /* ---- WEIGHT UNIT ---- */
+    function setUnit(u) {
+        weightUnit = u;
+        document.getElementById("kgBtn").classList.toggle("active", u === 'kg');
+        document.getElementById("gBtn").classList.toggle("active", u === 'g');
+        document.getElementById("unitLabel").textContent = u === 'kg' ? 'KG' : 'g';
+        document.getElementById("weight").placeholder = u === 'kg' ? "0.000" : "0";
+        document.getElementById("weight").step = u === 'kg' ? "0.001" : "1";
+    }
+
+    /* ---- PROCESS ---- */
+    function startProcess() {
+        let w = parseFloat(document.getElementById("weight").value);
+        if (!w || w <= 0) { showToast("Please enter a valid weight", "error"); return; }
+
+        // Convert to kg always for backend
+        let weightKg = weightUnit === 'g' ? w / 1000 : w;
+        if (weightKg <= 0) { showToast("Weight too small", "error"); return; }
+
+        nextStep(4);
+
+        // Signal servo open first, then start countdown
+        fetch("/servo_open", { method: "POST" })
+        .catch(() => {}); // silently ignore if arduino not connected
+
+        startCountdown(weightKg);
+    }
+
+    function startCountdown(weightKg) {
+        let t = 10;
+        const circumference = 490;
+        const ring = document.getElementById("ringProgress");
+        const timerNum = document.getElementById("timerNum");
+        const timerMsg = document.getElementById("timerMsg");
+
+        // Reset visuals
+        timerNum.textContent = t;
+        timerNum.style.color = "";
+        ring.style.stroke = "";
+        ring.style.strokeDashoffset = 0;
+        timerMsg.textContent = "⏳ Bin closing in...";
+
+        const interval = setInterval(() => {
+            t--;
+            timerNum.textContent = t;
+            // Decrease arc as time runs out
+            ring.style.strokeDashoffset = circumference * (t / 10);
+
+            if (t <= 3 && t > 0) {
+                timerNum.style.color = "#e53935";
+                ring.style.stroke = "#e53935";
+                timerMsg.textContent = "⚠️ Last chance! Closing soon!";
+            }
+
+            if (t <= 0) {
+                clearInterval(interval);
+                timerNum.textContent = "0";
+                timerMsg.textContent = "✅ Bin closed! Calculating tokens...";
+
+                fetch("/process", {
+                    method: "POST",
+                    body: new URLSearchParams({ weight: weightKg.toString() })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.error) {
+                        showToast(data.error, "error");
+                        nextStep(3);
+                        return;
+                    }
+
+                    // data.tokens = total, data.session_tokens = earned this round
+                    let totalTokens = parseInt(data.tokens) || 0;
+                    let earned = parseInt(data.session_tokens) || Math.round(weightKg * 10);
+
+                    document.getElementById("tokenDisplay").textContent = `🪙 ${totalTokens} tokens`;
+                    document.getElementById("earnedTokens").textContent = earned;
+
+                    setTimeout(() => {
+                        nextStep(5);
+                        loadShop();
+                    }, 800);
+                })
+                .catch(() => {
+                    showToast("Network error. Please try again.", "error");
+                    nextStep(3);
+                });
+            }
+        }, 1000);
+    }
+
+    function restartFlow() {
+        images = [];
+        selectedMaterial = null;
+        document.querySelectorAll(".material-card").forEach(c => c.classList.remove("selected"));
+        document.getElementById("weight").value = "";
+        renderGallery();
+        // Reset timer visuals
+        document.getElementById("timerNum").style.color = "";
+        document.getElementById("ringProgress").style.stroke = "";
+        if (cameraOn) stopCamera();
+        nextStep(1);
+    }
+
+    /* ---- SHOP ---- */
+    const PRODUCT_EMOJIS = {
+        'coffee': '☕', 'tea': '🍵', 'book': '📚', 'pen': '✏️',
+        'plant': '🌱', 'bag': '🛍️', 'bottle': '🍶', 'voucher': '🎟️',
+        'coupon': '🎫', 'snack': '🍪', 'juice': '🧃', 'shirt': '👕',
+        'cup': '🥤', 'eco': '♻️', 'soap': '🧼', 'food': '🍱',
+        'water': '💧', 'bike': '🚲', 'tree': '🌳', 'flower': '🌸',
+        'default': '🎁'
+    };
+
+    function getEmoji(name) {
+        let lower = name.toLowerCase();
+        for (let key in PRODUCT_EMOJIS) {
+            if (key !== 'default' && lower.includes(key)) return PRODUCT_EMOJIS[key];
+        }
+        return PRODUCT_EMOJIS.default;
+    }
+
+    function loadShop() {
+        fetch("/products")
+        .then(r => r.json())
+        .then(data => {
+            let shop = document.getElementById("shop");
+            if (!data || data.length === 0) {
+                shop.innerHTML = `
+                <div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:40px 20px">
+                    <div style="font-size:3rem;margin-bottom:12px">🌿</div>
+                    <div style="font-weight:600;margin-bottom:4px">No products available yet</div>
+                    <div style="font-size:0.85rem">Check back soon — the admin is adding rewards!</div>
+                </div>`;
+                return;
+            }
+
+            shop.innerHTML = "";
+            data.forEach(p => {
+                let emoji = getEmoji(p.name);
+                shop.innerHTML += `
+                <div class="shop-card">
+                    <div class="shop-emoji">${emoji}</div>
+                    <div class="shop-name">${p.name}</div>
+                    <div class="shop-price">🪙 ${p.price} tokens</div>
+                    <button class="btn btn-primary" onclick="buyProduct(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})">Redeem</button>
+                </div>`;
+            });
+        })
+        .catch(() => {
+            document.getElementById("shop").innerHTML = `
+            <div style="grid-column:1/-1;text-align:center;color:#e53935;padding:30px;font-size:0.9rem">
+                ⚠️ Failed to load products. Please refresh.
+            </div>`;
+        });
+    }
+
+    function buyProduct(id, name, price) {
+        fetch("/buy", {
+            method: "POST",
+            body: new URLSearchParams({ product_id: id })
+        })
+        .then(r => r.json())
+        .then(d => {
+            if (d.message) {
+                showToast(`✅ ${name} redeemed!`, "success");
+                let total = parseInt(d.tokens) || 0;
+                document.getElementById("tokenDisplay").textContent = `🪙 ${total} tokens`;
+            } else {
+                showToast(d.error || "Purchase failed", "error");
+            }
+        })
+        .catch(() => showToast("Network error", "error"));
+    }
+
+    /* ---- TOAST ---- */
+    function showToast(msg, type = "") {
+        let t = document.getElementById("toast");
+        t.textContent = msg;
+        t.className = `toast ${type} show`;
+        setTimeout(() => t.classList.remove("show"), 3200);
+    }
+
+    updateAuthUI();
+</script>
+</body>
+</html>
